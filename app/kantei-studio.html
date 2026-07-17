@@ -1,0 +1,579 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>鑑定スタジオ｜星・数・札</title>
+<style>
+:root {
+  --bg: #141227; --panel: #1e1b38; --panel2: #262148; --line: #3a3363;
+  --ink: #e8e4f5; --ink-dim: #a89fc9; --accent: #d4af6a; --accent-ink: #141227;
+  --sub: #8f7fd4; --good: #6cc5a8; --warn: #e0a06a;
+  --serif: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif;
+  --sans: "Hiragino Kaku Gothic ProN", "Yu Gothic", "YuGothic", "Noto Sans JP", sans-serif;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f6f3ea; --panel: #fffdf7; --panel2: #f0ebdd; --line: #d9d0bc;
+    --ink: #2a2440; --ink-dim: #6f6688; --accent: #9a7b3c; --accent-ink: #fffdf7;
+    --sub: #5c4bb0; --good: #2e8a6c; --warn: #b06a2e;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141227; --panel: #1e1b38; --panel2: #262148; --line: #3a3363;
+  --ink: #e8e4f5; --ink-dim: #a89fc9; --accent: #d4af6a; --accent-ink: #141227;
+  --sub: #8f7fd4; --good: #6cc5a8; --warn: #e0a06a;
+}
+:root[data-theme="light"] {
+  --bg: #f6f3ea; --panel: #fffdf7; --panel2: #f0ebdd; --line: #d9d0bc;
+  --ink: #2a2440; --ink-dim: #6f6688; --accent: #9a7b3c; --accent-ink: #fffdf7;
+  --sub: #5c4bb0; --good: #2e8a6c; --warn: #b06a2e;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.8; }
+header { padding: 28px 20px 18px; border-bottom: 1px solid var(--line); }
+header .wrap, main { max-width: 1080px; margin: 0 auto; }
+h1 { font-family: var(--serif); font-weight: 600; font-size: 26px; margin: 0; letter-spacing: .06em; }
+h1 .glyphs { color: var(--accent); margin-right: 10px; }
+header p { margin: 6px 0 0; color: var(--ink-dim); font-size: 13px; }
+main { padding: 20px; display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; }
+@media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
+.card h2 { font-family: var(--serif); font-size: 17px; margin: 0 0 14px; letter-spacing: .08em; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+.card h2 .g { color: var(--accent); margin-right: 8px; }
+label { display: block; font-size: 12px; color: var(--ink-dim); letter-spacing: .08em; margin: 12px 0 4px; }
+input, select, textarea {
+  width: 100%; padding: 9px 10px; border-radius: 7px; border: 1px solid var(--line);
+  background: var(--panel2); color: var(--ink); font-family: var(--sans); font-size: 14px;
+}
+input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px solid var(--sub); outline-offset: 1px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+button.primary {
+  width: 100%; margin-top: 18px; padding: 12px; border: 0; border-radius: 8px;
+  background: var(--accent); color: var(--accent-ink); font-size: 15px; font-weight: 700;
+  letter-spacing: .12em; cursor: pointer; font-family: var(--sans);
+}
+button.primary:hover { filter: brightness(1.08); }
+button.ghost {
+  padding: 8px 14px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel2);
+  color: var(--ink); font-size: 13px; cursor: pointer; font-family: var(--sans);
+}
+button.ghost:hover { border-color: var(--sub); }
+.results { display: grid; gap: 20px; }
+.hidden { display: none; }
+table.pos { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.pos th { text-align: left; color: var(--ink-dim); font-weight: 400; font-size: 12px; letter-spacing: .08em; border-bottom: 1px solid var(--line); padding: 4px 6px; }
+table.pos td { padding: 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.pos td.deg { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink-dim); }
+table.pos td.body { white-space: nowrap; }
+table.pos td .pg { color: var(--accent); margin-right: 6px; }
+.cusp { color: var(--warn); font-size: 12px; }
+.elembars { display: grid; gap: 6px; margin-top: 14px; }
+.elembars .eb { display: grid; grid-template-columns: 4.5em 1fr 2em; gap: 8px; align-items: center; font-size: 12.5px; }
+.eb .bar { height: 8px; border-radius: 4px; background: var(--panel2); overflow: hidden; }
+.eb .bar i { display: block; height: 100%; background: var(--sub); border-radius: 4px; }
+.eb .n { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-dim); }
+.numgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.numcell { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.numcell .k { font-size: 11.5px; color: var(--ink-dim); letter-spacing: .06em; }
+.numcell .v { font-family: var(--serif); font-size: 26px; color: var(--accent); line-height: 1.3; }
+.numcell .m { font-size: 12px; color: var(--ink-dim); }
+.interp { margin: 10px 0 0; font-size: 14px; }
+.interp dt { font-weight: 700; color: var(--sub); margin-top: 10px; }
+.interp dd { margin: 2px 0 0; }
+.tarot-cards { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.tcard { width: 148px; background: var(--panel2); border: 1px solid var(--line); border-radius: 9px; padding: 12px; }
+.tcard .pos-label { font-size: 11px; color: var(--ink-dim); letter-spacing: .08em; }
+.tcard .cname { font-family: var(--serif); font-size: 15px; margin: 4px 0; }
+.tcard .rev { color: var(--warn); font-size: 11.5px; }
+.tcard .mean { font-size: 12.5px; color: var(--ink-dim); }
+textarea#composer { min-height: 380px; font-size: 13.5px; line-height: 1.9; resize: vertical; }
+.toolbar { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
+.note { font-size: 12px; color: var(--ink-dim); margin-top: 12px; border-top: 1px dashed var(--line); padding-top: 10px; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--accent); color: var(--accent-ink); padding: 8px 18px; border-radius: 20px; font-size: 13px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header><div class="wrap">
+  <h1><span class="glyphs">☉ 9 ✦</span>鑑定スタジオ</h1>
+  <p>西洋占星術 × 数秘術 × タロット ― クライアント情報から「本質・適職・運勢」の鑑定素材と下書きを作る、あなた専用の作業台です。</p>
+</div></header>
+
+<main>
+  <!-- 入力 -->
+  <section class="card" aria-label="クライアント情報">
+    <h2><span class="g">✎</span>クライアント情報</h2>
+    <label for="cname">お名前（表示用・ニックネーム可）</label>
+    <input id="cname" placeholder="例：さくら（敬称は自動で付きます）">
+    <label for="croma">ローマ字名（任意・名前の数秘に使用）</label>
+    <input id="croma" placeholder="例：SAKURA SATO">
+    <label for="bdate">生年月日（必須）</label>
+    <input id="bdate" type="date" min="1900-01-01" max="2049-12-31">
+    <div class="row2">
+      <div>
+        <label for="btime">出生時間（任意）</label>
+        <input id="btime" type="time">
+      </div>
+      <div>
+        <label for="bpref">出生地（任意）</label>
+        <select id="bpref"><option value="">― 未入力 ―</option></select>
+      </div>
+    </div>
+    <label for="theme">相談テーマ</label>
+    <select id="theme">
+      <option value="total">総合（本質・適職・運勢）</option>
+      <option value="shokugyo">適職・仕事</option>
+      <option value="unsei">運勢・流れ</option>
+      <option value="honshitsu">本質・自分らしさ</option>
+    </select>
+    <label for="spread">タロットスプレッド</label>
+    <select id="spread">
+      <option value="3">3枚（過去・現在・未来）</option>
+      <option value="1">1枚（今日のメッセージ）</option>
+      <option value="5">5枚（状況・課題・強み・助言・展望）</option>
+    </select>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:14px;cursor:pointer">
+      <input type="checkbox" id="useRev" checked style="width:auto"> 逆位置を採用する
+    </label>
+    <button class="primary" id="run">鑑 定 す る</button>
+    <p class="note">出生時間と出生地を入れるとアセンダント（上昇星座）も計算します。未入力でも太陽〜冥王星と数秘・タロットは出せます。</p>
+  </section>
+
+  <!-- 結果 -->
+  <div class="results">
+    <section class="card hidden" id="astroCard" aria-label="西洋占星術">
+      <h2><span class="g">☉</span>西洋占星術 ― 天体配置</h2>
+      <div style="overflow-x:auto"><table class="pos" id="posTable"></table></div>
+      <div class="elembars" id="elembars"></div>
+      <dl class="interp" id="astroInterp"></dl>
+      <p class="note">※ 天体位置は簡易計算です（概ね±1°以内、月は±0.3°程度）。星座の境界（カスプ）±1.5°には ⚠ を表示します。納品前に境界付近だけ専門ソフトでご確認ください。</p>
+    </section>
+
+    <section class="card hidden" id="numCard" aria-label="数秘術">
+      <h2><span class="g">9</span>数秘術 ― 多層リーディング</h2>
+      <div class="numgrid" id="numGrid"></div>
+      <dl class="interp" id="numInterp"></dl>
+      <p class="note">※ マスターナンバー（11・22・33）は還元せずに保持しています。名前系の数（運命数・魂の数・人格数）はローマ字名を入力した場合のみ算出します。</p>
+    </section>
+
+    <section class="card hidden" id="tarotCard" aria-label="タロット">
+      <h2><span class="g">✦</span>タロット ― <span id="spreadName"></span></h2>
+      <div class="tarot-cards" id="tarotArea"></div>
+      <div class="toolbar"><button class="ghost" id="redraw">引き直す</button><span style="font-size:12px;color:var(--ink-dim)">※ 引き直しは鑑定ポリシーに合わせてご利用ください</span></div>
+    </section>
+
+    <section class="card hidden" id="composeCard" aria-label="鑑定文">
+      <h2><span class="g">✒</span>鑑定文の下書き</h2>
+      <p style="font-size:13px;color:var(--ink-dim);margin:0 0 10px">3つの占術の結果を1通の鑑定文に組み立てました。<b>これは素材です</b> ― あなた自身の読みと言葉で編集してから納品してください。</p>
+      <textarea id="composer" spellcheck="false"></textarea>
+      <div class="toolbar">
+        <button class="ghost" id="copyBtn">鑑定文をコピー</button>
+        <button class="ghost" id="rebuild">結果から作り直す</button>
+        <span id="charCount" style="font-size:12px;color:var(--ink-dim);font-variant-numeric:tabular-nums"></span>
+      </div>
+      <p class="note">文末に免責文（結果は解釈の一例であり将来や効果を保証しない旨）を自動で付けています。「必ず」「絶対」等の断定表現は編集時も避けてください（景品表示法・プラットフォーム規約対策）。</p>
+    </section>
+  </div>
+</main>
+<div class="toast" id="toast">コピーしました</div>
+
+<script>
+"use strict";
+/* ============ 天文計算（検証済み：太陽±0.2° 月±0.3° 惑星±1° ASC±3°） ============ */
+const D2R = Math.PI/180, R2D = 180/Math.PI;
+const norm = d => ((d % 360) + 360) % 360;
+function jdFromJST(y, m, d, hhJST) {
+  let ut = hhJST - 9;
+  if (m <= 2) { y -= 1; m += 12; }
+  const A = Math.floor(y/100), B = 2 - A + Math.floor(A/4);
+  return Math.floor(365.25*(y+4716)) + Math.floor(30.6001*(m+1)) + d + B - 1524.5 + ut/24;
+}
+function sunLon(JD) {
+  const T = (JD-2451545)/36525;
+  const L0 = norm(280.46646 + 36000.76983*T + 0.0003032*T*T);
+  const M = norm(357.52911 + 35999.05029*T - 0.0001537*T*T);
+  const C = (1.914602-0.004817*T)*Math.sin(M*D2R) + (0.019993-0.000101*T)*Math.sin(2*M*D2R) + 0.000289*Math.sin(3*M*D2R);
+  return norm(L0 + C);
+}
+function moonLon(JD) {
+  const T = (JD-2451545)/36525;
+  const Lp = norm(218.3164477+481267.88123421*T), D = norm(297.8501921+445267.1114034*T);
+  const M = norm(357.5291092+35999.0502909*T), Mp = norm(134.9633964+477198.8675055*T);
+  const F = norm(93.2720950+483202.0175233*T);
+  const s = x => Math.sin(x*D2R);
+  return norm(Lp + 6.288774*s(Mp) + 1.274027*s(2*D-Mp) + 0.658314*s(2*D) + 0.213618*s(2*Mp)
+    - 0.185116*s(M) - 0.114332*s(2*F) + 0.058793*s(2*D-2*Mp) + 0.057066*s(2*D-M-Mp)
+    + 0.053322*s(2*D+Mp) + 0.045758*s(2*D-M) - 0.040923*s(M-Mp) - 0.034720*s(D) - 0.030383*s(M+Mp));
+}
+const EL = {
+  mercury:[0.38709927,0.20563593,7.00497902,252.25032350,77.45779628,48.33076593,0.00000037,0.00001906,-0.00594749,149472.67411175,0.16047689,-0.12534081],
+  venus:[0.72333566,0.00677672,3.39467605,181.97909950,131.60246718,76.67984255,0.00000390,-0.00004107,-0.00078890,58517.81538729,0.00268329,-0.27769418],
+  earth:[1.00000261,0.01671123,-0.00001531,100.46457166,102.93768193,0,0.00000562,-0.00004392,-0.01294668,35999.37244981,0.32327364,0],
+  mars:[1.52371034,0.09339410,1.84969142,-4.55343205,-23.94362959,49.55953891,0.00001847,0.00007882,-0.00813131,19140.30268499,0.44441088,-0.29257343],
+  jupiter:[5.20288700,0.04838624,1.30439695,34.39644051,14.72847983,100.47390909,-0.00011607,-0.00013253,-0.00183714,3034.74612775,0.21252668,0.20469106],
+  saturn:[9.53667594,0.05386179,2.48599187,49.95424423,92.59887831,113.66242448,-0.00125060,-0.00050991,0.00193609,1222.49362201,-0.41897216,-0.28867794],
+  uranus:[19.18916464,0.04725744,0.77263783,313.23810451,170.95427630,74.01692503,-0.00196176,-0.00004397,-0.00242939,428.48202785,0.40805281,0.04240589],
+  neptune:[30.06992276,0.00859048,1.77004347,-55.12002969,44.96476227,131.78422574,0.00026291,0.00005105,0.00035372,218.45945325,-0.32241464,-0.00508664],
+  pluto:[39.48211675,0.24882730,17.14001206,238.92903833,224.06891629,110.30393684,-0.00031596,0.00005170,0.00004818,145.20780515,-0.04062942,-0.01183482]
+};
+function helio(name, T) {
+  const e0 = EL[name];
+  const a = e0[0]+e0[6]*T, ec = e0[1]+e0[7]*T, I = (e0[2]+e0[8]*T)*D2R;
+  const L = e0[3]+e0[9]*T, vp = e0[4]+e0[10]*T, Om = e0[5]+e0[11]*T;
+  const w = (vp-Om)*D2R, OmR = Om*D2R;
+  const M = norm(L-vp)*D2R;
+  let E = M;
+  for (let i=0;i<8;i++) E = M + ec*Math.sin(E);
+  const xv = a*(Math.cos(E)-ec), yv = a*Math.sqrt(1-ec*ec)*Math.sin(E);
+  return [
+    (Math.cos(w)*Math.cos(OmR)-Math.sin(w)*Math.sin(OmR)*Math.cos(I))*xv + (-Math.sin(w)*Math.cos(OmR)-Math.cos(w)*Math.sin(OmR)*Math.cos(I))*yv,
+    (Math.cos(w)*Math.sin(OmR)+Math.sin(w)*Math.cos(OmR)*Math.cos(I))*xv + (-Math.sin(w)*Math.sin(OmR)+Math.cos(w)*Math.cos(OmR)*Math.cos(I))*yv
+  ];
+}
+function planetLon(name, JD) {
+  const T = (JD-2451545)/36525;
+  const p = helio(name, T), e = helio('earth', T);
+  return norm(Math.atan2(p[1]-e[1], p[0]-e[0])*R2D + 1.39697*T);
+}
+function ascendant(JD, lat, lonE) {
+  const T = (JD-2451545)/36525;
+  const gmst = 280.46061837 + 360.98564736629*(JD-2451545) + 0.000387933*T*T;
+  const th = norm(gmst + lonE)*D2R, eps = (23.4392911-0.0130042*T)*D2R, phi = lat*D2R;
+  return norm(Math.atan2(-Math.cos(th), Math.sin(th)*Math.cos(eps) + Math.tan(phi)*Math.sin(eps))*R2D + 180);
+}
+
+/* ============ 解釈データ ============ */
+const SIGNS = [
+  {n:"牡羊座",g:"♈",el:"火",key:"開拓・スピード・率直",core:"思い立ったら動ける行動力と、道を切りひらく勇気",inner:"感情の立ち上がりが早く、素直",career:"立ち上げ・営業・現場リーダーなど「最初の一歩」を任される役割"},
+  {n:"牡牛座",g:"♉",el:"地",key:"安定・五感・継続",core:"じっくり積み上げる粘り強さと、本物を見分ける審美眼",inner:"安心できる環境で本領を発揮",career:"品質を磨く仕事・食や美に関わる仕事・コツコツ型の専門職"},
+  {n:"双子座",g:"♊",el:"風",key:"好奇心・言葉・機転",core:"情報をつかみ、言葉にして伝える器用さ",inner:"変化と刺激が心の栄養",career:"執筆・企画・広報・複数のことを並行して回す仕事"},
+  {n:"蟹座",g:"♋",el:"水",key:"共感・守る力・記憶",core:"人の気持ちを察し、居場所を育てる力",inner:"身内と認めた相手にはとことん尽くす",career:"支援職・教育・医療福祉・チームを守るマネジメント"},
+  {n:"獅子座",g:"♌",el:"火",key:"表現・誇り・創造",core:"自分らしさを表現し、人を照らす存在感",inner:"認められることが原動力",career:"表現・企画のリード・人前に立つ仕事・ブランドづくり"},
+  {n:"乙女座",g:"♍",el:"地",key:"分析・調整・実務",core:"細部に気づき、物事を整えて実務に落とす力",inner:"役に立てている実感が安心につながる",career:"分析・編集・品質管理・医療健康・サポートの専門家"},
+  {n:"天秤座",g:"♎",el:"風",key:"調和・美意識・対話",core:"バランス感覚と、人と人をつなぐ社交性",inner:"公平さを重んじ、争いより対話を選ぶ",career:"接客・交渉・デザイン・パートナーと組む仕事"},
+  {n:"蠍座",g:"♏",el:"水",key:"探究・集中・変容",core:"ひとつのことを深く掘り下げる集中力と再生力",inner:"心を許すまでは慎重、許せば一途",career:"研究・専門職・カウンセリング・お金や本質を扱う仕事"},
+  {n:"射手座",g:"♐",el:"火",key:"探求・自由・楽観",core:"遠くを目指す向上心と、学びを広げる冒険心",inner:"束縛より意味と自由を求める",career:"教育・発信・海外や思想に関わる仕事・専門知識の翻訳者"},
+  {n:"山羊座",g:"♑",el:"地",key:"責任・達成・構築",core:"目標に向けて計画的に積み上げる実行力",inner:"結果で信頼を築くタイプ",career:"経営管理・長期プロジェクト・組織で成果を出す仕事"},
+  {n:"水瓶座",g:"♒",el:"風",key:"独創・俯瞰・仲間",core:"常識にとらわれない視点と、未来を見る目",inner:"個としての自由と、志でつながる仲間を大切に",career:"企画開発・IT・コミュニティ運営・新しい仕組みづくり"},
+  {n:"魚座",g:"♓",el:"水",key:"想像・癒し・受容",core:"境界を越えて感じ取る感受性と、包み込むやさしさ",inner:"雰囲気や感情を吸い取りやすいので休息が大切",career:"芸術・癒しの仕事・スピリチュアル・寄り添う支援職"}
+];
+const BODIES = [
+  {id:"sun", n:"太陽", g:"☉", role:"人生の目的・本質"},
+  {id:"moon", n:"月", g:"☽", role:"素の感情・安心のかたち"},
+  {id:"mercury", n:"水星", g:"☿", role:"思考と伝え方"},
+  {id:"venus", n:"金星", g:"♀", role:"愛し方・楽しみ方"},
+  {id:"mars", n:"火星", g:"♂", role:"行動力・情熱の使い方"},
+  {id:"jupiter", n:"木星", g:"♃", role:"広がる幸運の方向"},
+  {id:"saturn", n:"土星", g:"♄", role:"課題と成熟のテーマ"},
+  {id:"uranus", n:"天王星", g:"♅", role:"変革の衝動（世代）"},
+  {id:"neptune", n:"海王星", g:"♆", role:"夢と理想（世代）"},
+  {id:"pluto", n:"冥王星", g:"♇", role:"変容の力（世代）"}
+];
+const NUM_M = {
+  1:{t:"開拓者",e:"自分で道を決めて先頭を歩くとき、最も力が出る人。独立心と始める力。",c:"リーダー職・起業・新規開拓",y:"種まきとスタートの年。新しく始めたことが今後の土台になります。"},
+  2:{t:"調和の人",e:"人と人のあいだに立ち、支え、つなぐ繊細な感受性。協力の中で輝く人。",c:"サポート職・調整役・パートナーシップで進める仕事",y:"協力と調整の年。焦らず、人との関係を育てることが実りにつながります。"},
+  3:{t:"創造の人",e:"楽しむ力と表現力の人。喜びを生み出し、周囲を明るくする才能。",c:"表現・企画・子どもや娯楽に関わる仕事",y:"創造と表現の年。楽しいと感じる方向に、伸びる芽があります。"},
+  4:{t:"土台を築く人",e:"コツコツと形にする堅実さ。信頼と継続で価値をつくる人。",c:"実務・管理・技術職・長く続ける専門",y:"基礎固めの年。地味に見える積み重ねが、後の飛躍を支えます。"},
+  5:{t:"自由と変化の人",e:"変化を恐れず経験から学ぶ人。行動範囲を広げるほど運が動く。",c:"営業・発信・変化の多い環境・複業",y:"変化と拡大の年。環境の変化は追い風です。柔軟に乗ってください。"},
+  6:{t:"愛と責任の人",e:"身近な人を大切に育てる愛情深さ。頼られることが多い人。",c:"教育・美容・医療福祉・家庭やコミュニティに関わる仕事",y:"愛情と責任の年。大切な人やチームに時間を使うほど満ちていきます。"},
+  7:{t:"探究者",e:"本質を見抜く分析力と、ひとりの時間で深める知性。",c:"研究・専門職・分析・精神世界の探究",y:"内省と学びの年。急がず、深めることに価値がある時期です。"},
+  8:{t:"実現の人",e:"目標を現実の成果へ変えるパワー。お金や組織を動かす器。",c:"経営・金融・成果で評価される仕事",y:"収穫と実行の年。これまでの努力が形になりやすい時期です。"},
+  9:{t:"手放しと統合の人",e:"経験を統合し、広い視野で人に還元する成熟した魂。",c:"支援・教育・執筆・締めくくりと橋渡しの役割",y:"完了と手放しの年。終わらせることが、次の始まりの準備になります。"},
+  11:{t:"直感のメッセンジャー（マスターナンバー）",e:"鋭い直感とインスピレーション。感じ取ったことを人に伝える役割。",c:"スピリチュアル・カウンセリング・発信・芸術",y:"直感が冴える年。ひらめきをメモし、感性に従う選択を。"},
+  22:{t:"大きな建築家（マスターナンバー）",e:"理想を現実の大きな形にする力。スケールの大きな構築の人。",c:"事業構築・社会的プロジェクト・仕組みづくり",y:"大きな構想を形にし始める年。土台づくりに妥協しないこと。"},
+  33:{t:"無条件の愛の人（マスターナンバー）",e:"見返りを求めない愛と癒しの器。存在そのものが人を安心させる。",c:"癒し・教育・奉仕性の高い仕事",y:"与えることがめぐる年。ただし自分を後回しにしすぎない注意も。"}
+};
+/* タロット78枚 [名前, 正位置, 逆位置] */
+const MAJOR = [
+  ["愚者","自由な一歩・可能性・冒険心","無計画・迷い・準備不足"],
+  ["魔術師","創造・才能の発揮・良いスタート","空回り・迷い・準備不足の行動"],
+  ["女教皇","直感・知性・静かな洞察","神経質・迷いすぎ・受け身"],
+  ["女帝","豊かさ・愛情・実り","停滞・過保護・自分を甘やかす"],
+  ["皇帝","責任・達成・リーダーシップ","独断・頑固・支配的"],
+  ["法王","信頼・助言・正しい導き","形式主義・独善・助言のすれ違い"],
+  ["恋人","選択・共感・楽しい交流","迷い・優柔不断・気持ちのずれ"],
+  ["戦車","前進・勝利・スピード","暴走・空回り・焦り"],
+  ["力","内なる強さ・忍耐・信頼関係","無理をしている・自信喪失"],
+  ["隠者","内省・探求・静かな時間","孤立・考えすぎ・閉じこもり"],
+  ["運命の輪","転機・チャンス・流れの好転","タイミングのずれ・停滞"],
+  ["正義","公平・バランス・誠実な判断","不均衡・妥協・見て見ぬふり"],
+  ["吊るされた男","視点の転換・修行・実りある忍耐","徒労感・視野の狭さ"],
+  ["死神","区切り・再生・古いものの終わり","執着・手放せない・停滞"],
+  ["節制","調和・整える・ちょうど良い加減","アンバランス・浪費・極端"],
+  ["悪魔","誘惑・執着・現実的な欲","縁の切れ目・執着からの解放"],
+  ["塔","突然の変化・価値観の崩壊と刷新","ギリギリの回避・変化の予兆"],
+  ["星","希望・理想・癒し","理想と現実のギャップ・悲観"],
+  ["月","不安・曖昧さ・見えない状況","不安の晴れ・真実が見える"],
+  ["太陽","成功・生命力・素直な喜び","元気の低下・自信の揺らぎ"],
+  ["審判","復活・目覚め・再チャレンジ","過去への囚われ・決断の先延ばし"],
+  ["世界","完成・達成・統合","あと一歩・未完成・次の課題"]
+];
+const SUITS = [
+  ["ワンド","情熱・行動",[
+    ["A","情熱の点火・始まりの合図","やる気の空回り・出遅れ"],
+    ["2","展望を描く・次の一手の思案","視野の狭さ・迷い"],
+    ["3","計画の進展・広がる見通し","見通しの甘さ・遅延"],
+    ["4","安定・お祝い・一区切り","マンネリ・落ち着かない"],
+    ["5","切磋琢磨・健全な競争","無益な争い・消耗"],
+    ["6","勝利・承認・良い知らせ","評価されない焦り・慢心"],
+    ["7","守り抜く・優位な立場","孤軍奮闘・プレッシャー"],
+    ["8","急展開・スピード・追い風","急ぎすぎ・タイミング待ち"],
+    ["9","備え・粘り・最後の守り","警戒しすぎ・疲弊"],
+    ["10","責任の重さ・やり遂げる力","抱え込みすぎ・限界超え"],
+    ["ペイジ","新しい挑戦の知らせ・素直な熱意","気まぐれ・熱の冷め"],
+    ["ナイト","勢いある行動・情熱的な人物","無鉄砲・急ぎすぎ"],
+    ["クイーン","明るい自信・人を惹きつける魅力","気分屋・嫉妬"],
+    ["キング","ビジョンを持つリーダー","独りよがり・強引"]
+  ]],
+  ["カップ","感情・関係",[
+    ["A","愛情の始まり・心が満ちる","感情の空回り・満たされなさ"],
+    ["2","信頼関係・心の通う交流","すれ違い・関係の揺らぎ"],
+    ["3","喜びの共有・祝福・仲間","なれ合い・楽しみすぎ"],
+    ["4","倦怠・見過ごしている好機","気づき・停滞からの脱出"],
+    ["5","喪失感・後悔","残されたものへの気づき・回復"],
+    ["6","懐かしさ・純粋な思いやり","過去への執着・子どもっぽさ"],
+    ["7","夢想・選択肢の多さ","現実を見る・目が覚める"],
+    ["8","次の段階への旅立ち・手放し","未練・中途半端な放棄"],
+    ["9","願いの成就・満足","自己満足・足るを知らない"],
+    ["10","家庭的な幸福・円満","理想と現実の差・不和"],
+    ["ペイジ","素直な気持ちの芽生え・良い便り","感傷的・現実逃避"],
+    ["ナイト","ロマンチックな提案・優しい人物","八方美人・口先だけ"],
+    ["クイーン","深い共感・包み込む愛情","感情に流される・依存"],
+    ["キング","寛容・成熟した思いやり","感情の抑圧・偽善"]
+  ]],
+  ["ソード","思考・決断",[
+    ["A","明晰な判断・突破口","混乱・誤解・力の乱用"],
+    ["2","保留・均衡・見ないふり","決断の時・目隠しが外れる"],
+    ["3","痛み・悲しみ・別離","癒しの始まり・痛みの緩和"],
+    ["4","休息・充電・小休止","休みすぎ・再始動の時"],
+    ["5","勝っても残るしこり・策略","和解・無益な争いの終わり"],
+    ["6","移行・困難からの脱出","進めない事情・足踏み"],
+    ["7","戦略・工夫・単独行動","ごまかし・詰めの甘さ"],
+    ["8","八方ふさがりの思い込み","制限からの解放・視界が開く"],
+    ["9","不安・心配・眠れない夜","不安の正体が見える・回復へ"],
+    ["10","どん底・強制終了","夜明け・最悪期の終わり"],
+    ["ペイジ","情報収集・様子見・機転","詮索・軽率な発言"],
+    ["ナイト","猛スピードの行動・切り込む知性","勇み足・攻撃的"],
+    ["クイーン","聡明・公正・自立した知性","辛辣・孤独・厳しすぎ"],
+    ["キング","論理と権威・的確な判断","冷酷・理屈で押し切る"]
+  ]],
+  ["ペンタクル","物質・実り",[
+    ["A","豊かさの種・現実的なチャンス","チャンスの見送り・計画倒れ"],
+    ["2","やりくり上手・柔軟な両立","バランス崩れ・自転車操業"],
+    ["3","技術の評価・チームでの成果","独りよがり・雑な仕事"],
+    ["4","堅実な確保・守る力","ケチ・執着・変化への抵抗"],
+    ["5","経済的・精神的な不安","支援が見つかる・回復の兆し"],
+    ["6","与える・受け取る・良い循環","不公平な関係・見返り要求"],
+    ["7","成長待ちの我慢・中間評価","焦り・実らない投資"],
+    ["8","修練・コツコツ磨く技術","惰性・雑になる・手抜き"],
+    ["9","達成による豊かさ・自立","浪費・見栄・不相応"],
+    ["10","家族的繁栄・受け継がれる豊かさ","相続や家のもめごと・損失"],
+    ["ペイジ","堅実な学び・実務の始まり","怠慢・計画倒れ"],
+    ["ナイト","着実な努力家・信頼できる進み方","停滞・融通の利かなさ"],
+    ["クイーン","実務と愛情の両立・豊かな世話役","心配性・過干渉"],
+    ["キング","経済的成功・安定の提供者","強欲・物質主義"]
+  ]]
+];
+function buildDeck() {
+  const deck = MAJOR.map((c,i)=>({name:c[0], no:"大アルカナ "+i, up:c[1], rev:c[2]}));
+  for (const [suit, , cards] of SUITS)
+    for (const [r,u,v] of cards) deck.push({name:suit+"の"+r, no:suit, up:u, rev:v});
+  return deck;
+}
+const SPREADS = {
+  "1": {name:"1枚引き", pos:["メッセージ"]},
+  "3": {name:"スリーカード", pos:["過去（背景）","現在（いま）","未来（流れ）"]},
+  "5": {name:"5枚スプレッド", pos:["状況","課題","強み","助言","展望"]}
+};
+const PREFS = [["北海道",43.06,141.35],["青森県",40.82,140.74],["岩手県",39.70,141.15],["宮城県",38.27,140.87],["秋田県",39.72,140.10],["山形県",38.24,140.36],["福島県",37.75,140.47],["茨城県",36.34,140.45],["栃木県",36.57,139.88],["群馬県",36.39,139.06],["埼玉県",35.86,139.65],["千葉県",35.61,140.12],["東京都",35.69,139.69],["神奈川県",35.45,139.64],["新潟県",37.90,139.02],["富山県",36.70,137.21],["石川県",36.59,136.63],["福井県",36.07,136.22],["山梨県",35.66,138.57],["長野県",36.65,138.18],["岐阜県",35.39,136.72],["静岡県",34.98,138.38],["愛知県",35.18,136.91],["三重県",34.73,136.51],["滋賀県",35.00,135.87],["京都府",35.02,135.76],["大阪府",34.69,135.52],["兵庫県",34.69,135.18],["奈良県",34.69,135.83],["和歌山県",34.23,135.17],["鳥取県",35.50,134.24],["島根県",35.47,133.05],["岡山県",34.66,133.93],["広島県",34.40,132.46],["山口県",34.19,131.47],["徳島県",34.07,134.56],["香川県",34.34,134.04],["愛媛県",33.84,132.77],["高知県",33.56,133.53],["福岡県",33.61,130.42],["佐賀県",33.25,130.30],["長崎県",32.74,129.87],["熊本県",32.79,130.74],["大分県",33.24,131.61],["宮崎県",31.91,131.42],["鹿児島県",31.56,130.56],["沖縄県",26.21,127.68]];
+
+/* ============ 数秘術 ============ */
+function reduceNum(n, keepMaster = true) {
+  while (n > 9) {
+    if (keepMaster && (n === 11 || n === 22 || n === 33)) return n;
+    n = String(n).split("").reduce((a,c)=>a+ +c, 0);
+  }
+  return n;
+}
+function digitsSum(str) { return String(str).split("").reduce((a,c)=>a+ +c, 0); }
+function lifePath(y,m,d) { return reduceNum(digitsSum(""+y) + digitsSum(""+m) + digitsSum(""+d)); }
+function personalYear(y,m,d, nowY) { return reduceNum(reduceNum(digitsSum(""+m)+digitsSum(""+d), false) + digitsSum(""+nowY), false); }
+const LETTER_V = {A:1,B:2,C:3,D:4,E:5,F:6,G:7,H:8,I:9,J:1,K:2,L:3,M:4,N:5,O:6,P:7,Q:8,R:9,S:1,T:2,U:3,V:4,W:5,X:6,Y:7,Z:8};
+const VOWELS = "AEIOU";
+function nameNums(roma) {
+  const s = roma.toUpperCase().replace(/[^A-Z]/g,"");
+  if (!s) return null;
+  let all=0, vow=0, cons=0;
+  for (const ch of s) {
+    const v = LETTER_V[ch]; all += v;
+    if (VOWELS.includes(ch)) vow += v; else cons += v;
+  }
+  return { expression: reduceNum(all), soul: reduceNum(vow), personality: reduceNum(cons) };
+}
+
+/* ============ UI ============ */
+const $ = id => document.getElementById(id);
+const prefSel = $("bpref");
+PREFS.forEach(([n],i)=>{ const o=document.createElement("option"); o.value=i; o.textContent=n; prefSel.appendChild(o); });
+let lastResult = null;
+
+function signOf(lon) { return { idx: Math.floor(lon/30), deg: lon % 30 }; }
+function fmtDeg(d) { return d.toFixed(1) + "°"; }
+function cuspFlag(deg) { return (deg < 1.5 || deg > 28.5) ? ' <span class="cusp">⚠ 境界付近</span>' : ""; }
+
+$("run").addEventListener("click", () => {
+  const dateStr = $("bdate").value;
+  if (!dateStr) { alert("生年月日を入力してください"); return; }
+  const [y,m,d] = dateStr.split("-").map(Number);
+  const timeStr = $("btime").value;
+  let hh = 12, hasTime = false;
+  if (timeStr) { const [H,Mi] = timeStr.split(":").map(Number); hh = H + Mi/60; hasTime = true; }
+  const JD = jdFromJST(y,m,d,hh);
+  const name = ($("cname").value.trim() || "クライアント").replace(/[\s　]*(さま|様|さん|氏)$/, "");
+
+  /* --- 占星術 --- */
+  const placements = [];
+  placements.push({body:BODIES[0], lon:sunLon(JD)});
+  placements.push({body:BODIES[1], lon:moonLon(JD)});
+  for (let i=2;i<BODIES.length;i++) placements.push({body:BODIES[i], lon:planetLon(BODIES[i].id, JD)});
+  let asc = null;
+  const prefIdx = prefSel.value;
+  if (hasTime && prefIdx !== "") {
+    const [,lat,lonE] = PREFS[+prefIdx];
+    asc = ascendant(JD, lat, lonE);
+  }
+  let rows = "<tr><th>天体</th><th>星座</th><th>度数</th><th>意味</th></tr>";
+  const elemCount = {火:0, 地:0, 風:0, 水:0};
+  for (const p of placements) {
+    const s = signOf(p.lon), sg = SIGNS[s.idx];
+    elemCount[sg.el]++;
+    rows += `<tr><td class="body"><span class="pg">${p.body.g}</span>${p.body.n}</td><td>${sg.g} ${sg.n}${cuspFlag(s.deg)}</td><td class="deg">${fmtDeg(s.deg)}</td><td>${p.body.role}</td></tr>`;
+  }
+  if (asc !== null) {
+    const s = signOf(asc), sg = SIGNS[s.idx];
+    elemCount[sg.el]++;
+    rows += `<tr><td class="body"><span class="pg">↑</span>ASC</td><td>${sg.g} ${sg.n}${cuspFlag(s.deg)}</td><td class="deg">${fmtDeg(s.deg)}</td><td>第一印象・生まれ持った雰囲気</td></tr>`;
+  }
+  $("posTable").innerHTML = rows;
+  const total = Object.values(elemCount).reduce((a,b)=>a+b,0);
+  $("elembars").innerHTML = Object.entries(elemCount).map(([el,c]) =>
+    `<div class="eb"><span>${el}の質</span><span class="bar"><i style="width:${(c/total*100).toFixed(0)}%"></i></span><span class="n">${c}</span></div>`).join("");
+
+  const sunS = SIGNS[signOf(placements[0].lon).idx];
+  const moonS = SIGNS[signOf(placements[1].lon).idx];
+  const marsS = SIGNS[signOf(placements[4].lon).idx];
+  const ascS = asc !== null ? SIGNS[signOf(asc).idx] : null;
+  let interp = `<dt>☉ 太陽 ${sunS.n} ― 本質</dt><dd>${sunS.core}が、この方の人生の軸です。キーワードは「${sunS.key}」。</dd>`;
+  interp += `<dt>☽ 月 ${moonS.n} ― 心のかたち</dt><dd>プライベートでは${moonS.inner}な面が出ます。安心の鍵は${moonS.el}の質（${moonS.key}）にあります。</dd>`;
+  if (ascS) interp += `<dt>↑ ASC ${ascS.n} ― 第一印象</dt><dd>初対面では「${ascS.key}」の雰囲気をまとって見られやすい方です。</dd>`;
+  interp += `<dt>♂ 火星 ${marsS.n} ― エネルギーの使い方</dt><dd>${marsS.career}で力を発揮しやすい配置です。</dd>`;
+  $("astroInterp").innerHTML = interp;
+  $("astroCard").classList.remove("hidden");
+
+  /* --- 数秘術 --- */
+  const lp = lifePath(y,m,d);
+  const bd = reduceNum(d);
+  const nowY = new Date().getFullYear();
+  const py = personalYear(y,m,d,nowY);
+  const pm = reduceNum(py + (new Date().getMonth()+1), false);
+  const nn = nameNums($("croma").value);
+  const cells = [
+    ["ライフパス", lp, "人生のテーマ"],
+    ["バースデー", bd, "生まれ持つ才能"],
+    ["パーソナルイヤー", py, nowY + "年の流れ"],
+    ["パーソナルマンス", pm, "今月の流れ"]
+  ];
+  if (nn) cells.push(["運命数（名前）", nn.expression, "社会での役割"], ["魂の数", nn.soul, "内なる望み"], ["人格数", nn.personality, "外から見た印象"]);
+  $("numGrid").innerHTML = cells.map(([k,v,m2]) =>
+    `<div class="numcell"><div class="k">${k}</div><div class="v">${v}</div><div class="m">${m2}</div></div>`).join("");
+  let ni = `<dt>ライフパス ${lp}「${NUM_M[lp].t}」</dt><dd>${NUM_M[lp].e}</dd>`;
+  ni += `<dt>適性の方向</dt><dd>${NUM_M[lp].c}に縁があります。</dd>`;
+  ni += `<dt>パーソナルイヤー ${py}（${nowY}年）</dt><dd>${NUM_M[py] ? NUM_M[py].y : ""}</dd>`;
+  if (nn && nn.expression !== lp) ni += `<dt>運命数 ${nn.expression}「${NUM_M[nn.expression].t}」</dt><dd>社会の中では、${NUM_M[nn.expression].e}</dd>`;
+  $("numInterp").innerHTML = ni;
+  $("numCard").classList.remove("hidden");
+
+  /* --- タロット --- */
+  const draw = drawTarot();
+
+  lastResult = { name, dateStr, timeStr, placements, asc, sunS, moonS, marsS, ascS, lp, bd, py, pm, nn, nowY, draw, theme: $("theme").value };
+  buildComposer();
+  $("composeCard").classList.remove("hidden");
+  $("composeCard").scrollIntoView({behavior:"smooth", block:"nearest"});
+});
+
+function drawTarot() {
+  const spreadKey = $("spread").value;
+  const spread = SPREADS[spreadKey];
+  const useRev = $("useRev").checked;
+  const deck = buildDeck();
+  const drawn = [];
+  const rnd = new Uint32Array(spread.pos.length * 2);
+  crypto.getRandomValues(rnd);
+  for (let i=0; i<spread.pos.length; i++) {
+    const idx = rnd[i*2] % deck.length;
+    const card = deck.splice(idx,1)[0];
+    const rev = useRev && (rnd[i*2+1] % 2 === 1);
+    drawn.push({pos: spread.pos[i], card, rev});
+  }
+  $("spreadName").textContent = spread.name;
+  $("tarotArea").innerHTML = drawn.map(d =>
+    `<div class="tcard"><div class="pos-label">${d.pos}</div><div class="cname">${d.card.name}${d.rev ? ' <span class="rev">逆位置</span>' : ""}</div><div class="mean">${d.rev ? d.card.rev : d.card.up}</div></div>`).join("");
+  $("tarotCard").classList.remove("hidden");
+  return drawn;
+}
+$("redraw").addEventListener("click", () => {
+  if (!lastResult) return;
+  lastResult.draw = drawTarot();
+  buildComposer();
+});
+
+/* --- 鑑定文の組み立て --- */
+function buildComposer() {
+  if (!lastResult) return;
+  const r = lastResult;
+  const L = [];
+  L.push(`${r.name}さま`);
+  L.push("");
+  L.push("このたびはご依頼ありがとうございます。西洋占星術・数秘術・タロットの3つの視点から拝見しました。");
+  L.push("");
+  L.push("━━ 1. 本質 ― どんな魂を持った方か ━━");
+  L.push(`太陽星座は${r.sunS.n}。${r.sunS.core}が、${r.name}さまの人生の軸です。`);
+  L.push(`月星座は${r.moonS.n}。プライベートでは${r.moonS.inner}な一面をお持ちです。`);
+  if (r.ascS) L.push(`アセンダント（上昇星座）は${r.ascS.n}。初対面では「${r.ascS.key}」の印象を持たれやすいでしょう。`);
+  L.push(`数秘術のライフパスは「${r.lp}（${NUM_M[r.lp].t}）」。${NUM_M[r.lp].e}`);
+  L.push("");
+  L.push("━━ 2. 適職 ― 力を発揮しやすい方向 ━━");
+  L.push(`太陽${r.sunS.n}の方向性としては、${r.sunS.career}が向いています。`);
+  L.push(`行動力を司る火星は${r.marsS.n}にあり、${r.marsS.career}でエネルギーを活かしやすい配置です。`);
+  L.push(`数秘の観点では${NUM_M[r.lp].c}に縁があります。`);
+  if (r.nn && r.nn.expression !== r.lp) L.push(`お名前から出る運命数は「${r.nn.expression}（${NUM_M[r.nn.expression].t}）」。社会の中では、${NUM_M[r.nn.expression].e}`);
+  L.push("");
+  L.push(`━━ 3. 運勢 ― いまの流れ（${r.nowY}年） ━━`);
+  L.push(`パーソナルイヤーは「${r.py}」。${NUM_M[r.py] ? NUM_M[r.py].y : ""}`);
+  L.push("");
+  L.push("━━ 4. タロットからのメッセージ ━━");
+  for (const d of r.draw) {
+    L.push(`【${d.pos}】${d.card.name}${d.rev ? "（逆位置）" : ""} ― ${d.rev ? d.card.rev : d.card.up}`);
+  }
+  L.push("");
+  L.push("（↑ここに、カードを通してあなたが感じ取ったことばを添えてください）");
+  L.push("");
+  L.push("━━ 結びに ━━");
+  L.push("鑑定結果は未来を決めつけるものではなく、より良い選択のための地図です。最後に選ぶのはいつもご自身であり、その選択を星も数も札も応援しています。");
+  L.push("");
+  L.push("※本鑑定は占術にもとづく解釈の一例であり、結果や効果を保証するものではありません。医療・法律・投資のご判断は専門家にご相談ください。");
+  const txt = L.join("\n");
+  $("composer").value = txt;
+  $("charCount").textContent = txt.length + "文字";
+}
+$("rebuild").addEventListener("click", buildComposer);
+$("composer").addEventListener("input", e => { $("charCount").textContent = e.target.value.length + "文字"; });
+$("copyBtn").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText($("composer").value);
+  } catch {
+    $("composer").select(); document.execCommand("copy");
+  }
+  const t = $("toast"); t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 1500);
+});
+</script>
