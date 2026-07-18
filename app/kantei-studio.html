@@ -114,7 +114,8 @@ textarea#composer { min-height: 380px; font-size: 13.5px; line-height: 1.9; resi
       </div>
       <div>
         <label for="bpref">出生地（任意）</label>
-        <select id="bpref"><option value="">― 未入力 ―</option></select>
+        <input id="bpref" list="prefList" placeholder="例：東京都" autocomplete="off">
+        <datalist id="prefList"></datalist>
       </div>
     </div>
     <label for="theme">相談テーマ</label>
@@ -411,8 +412,17 @@ function nameNums(roma) {
 
 /* ============ UI ============ */
 const $ = id => document.getElementById(id);
-const prefSel = $("bpref");
-PREFS.forEach(([n],i)=>{ const o=document.createElement("option"); o.value=i; o.textContent=n; prefSel.appendChild(o); });
+const prefList = $("prefList");
+PREFS.forEach(([n])=>{ const o=document.createElement("option"); o.value=n; prefList.appendChild(o); });
+function prefLookup(str) {
+  const s = str.trim().replace(/[\s　]/g, "");
+  if (!s) return -1;
+  const strip = t => t.replace(/[都道府県]$/, "");
+  let i = PREFS.findIndex(p => p[0] === s);
+  if (i < 0) i = PREFS.findIndex(p => strip(p[0]) === strip(s));
+  if (i < 0) i = PREFS.findIndex(p => p[0].startsWith(s) || s.startsWith(strip(p[0])));
+  return i;
+}
 let lastResult = null;
 
 function signOf(lon) { return { idx: Math.floor(lon/30), deg: lon % 30 }; }
@@ -435,10 +445,14 @@ $("run").addEventListener("click", () => {
   placements.push({body:BODIES[1], lon:moonLon(JD)});
   for (let i=2;i<BODIES.length;i++) placements.push({body:BODIES[i], lon:planetLon(BODIES[i].id, JD)});
   let asc = null;
-  const prefIdx = prefSel.value;
-  if (hasTime && prefIdx !== "") {
-    const [,lat,lonE] = PREFS[+prefIdx];
-    asc = ascendant(JD, lat, lonE);
+  const prefText = $("bpref").value;
+  if (prefText.trim()) {
+    const pi = prefLookup(prefText);
+    if (pi < 0) { alert("出生地が見つかりませんでした。「東京都」「大阪府」のように都道府県名で入力してください。"); return; }
+    if (hasTime) {
+      const [,lat,lonE] = PREFS[pi];
+      asc = ascendant(JD, lat, lonE);
+    }
   }
   let rows = "<tr><th>天体</th><th>星座</th><th>度数</th><th>意味</th></tr>";
   const elemCount = {火:0, 地:0, 風:0, 水:0};
