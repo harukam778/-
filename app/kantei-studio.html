@@ -45,6 +45,11 @@ input, select, textarea {
 }
 input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px solid var(--sub); outline-offset: 1px; }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.row3 { display: flex; gap: 8px; }
+.dfield { display: flex; align-items: center; gap: 5px; flex: 1; }
+.dfield input { text-align: center; }
+.dfield span { color: var(--ink-dim); font-size: 13px; flex-shrink: 0; }
+.err { color: #e07070; font-size: 13px; margin: 12px 0 0; }
 button.primary {
   width: 100%; margin-top: 18px; padding: 12px; border: 0; border-radius: 8px;
   background: var(--accent); color: var(--accent-ink); font-size: 15px; font-weight: 700;
@@ -105,12 +110,19 @@ textarea#composer { min-height: 380px; font-size: 13.5px; line-height: 1.9; resi
     <input id="cname" placeholder="例：さくら（敬称は自動で付きます）">
     <label for="croma">ローマ字名（任意・名前の数秘に使用）</label>
     <input id="croma" placeholder="例：SAKURA SATO">
-    <label for="bdate">生年月日（必須）</label>
-    <input id="bdate" type="date" min="1900-01-01" max="2049-12-31">
+    <label for="by">生年月日（必須）</label>
+    <div class="row3">
+      <div class="dfield"><input id="by" inputmode="numeric" maxlength="4" placeholder="1990" autocomplete="off"><span>年</span></div>
+      <div class="dfield"><input id="bm" inputmode="numeric" maxlength="2" placeholder="3" autocomplete="off"><span>月</span></div>
+      <div class="dfield"><input id="bd" inputmode="numeric" maxlength="2" placeholder="15" autocomplete="off"><span>日</span></div>
+    </div>
     <div class="row2">
       <div>
-        <label for="btime">出生時間（任意）</label>
-        <input id="btime" type="time">
+        <label for="bh">出生時間（任意・24時間制）</label>
+        <div class="row3">
+          <div class="dfield"><input id="bh" inputmode="numeric" maxlength="2" placeholder="6" autocomplete="off"><span>時</span></div>
+          <div class="dfield"><input id="bmin" inputmode="numeric" maxlength="2" placeholder="30" autocomplete="off"><span>分</span></div>
+        </div>
       </div>
       <div>
         <label for="bpref">出生地（任意）</label>
@@ -134,6 +146,7 @@ textarea#composer { min-height: 380px; font-size: 13.5px; line-height: 1.9; resi
     <label style="display:flex;align-items:center;gap:8px;margin-top:14px;cursor:pointer">
       <input type="checkbox" id="useRev" checked style="width:auto"> 逆位置を採用する
     </label>
+    <p class="err hidden" id="formErr" role="alert"></p>
     <button class="primary" id="run">鑑 定 す る</button>
     <p class="note">出生時間と出生地を入れるとアセンダント（上昇星座）も計算します。未入力でも太陽〜冥王星と数秘・タロットは出せます。</p>
   </section>
@@ -429,13 +442,29 @@ function signOf(lon) { return { idx: Math.floor(lon/30), deg: lon % 30 }; }
 function fmtDeg(d) { return d.toFixed(1) + "°"; }
 function cuspFlag(deg) { return (deg < 1.5 || deg > 28.5) ? ' <span class="cusp">⚠ 境界付近</span>' : ""; }
 
+function showErr(msg) {
+  const e = $("formErr");
+  if (!msg) { e.classList.add("hidden"); e.textContent = ""; return; }
+  e.textContent = msg;
+  e.classList.remove("hidden");
+}
 $("run").addEventListener("click", () => {
-  const dateStr = $("bdate").value;
-  if (!dateStr) { alert("生年月日を入力してください"); return; }
-  const [y,m,d] = dateStr.split("-").map(Number);
-  const timeStr = $("btime").value;
+  showErr("");
+  const y = parseInt($("by").value, 10), m = parseInt($("bm").value, 10), d = parseInt($("bd").value, 10);
+  if (!y && !m && !d) { showErr("生年月日を入力してください（例：1990 / 3 / 15）"); return; }
+  if (!(y >= 1900 && y <= 2049)) { showErr("「年」は1900〜2049の4桁で入力してください（例：1990）"); return; }
+  if (!(m >= 1 && m <= 12)) { showErr("「月」は1〜12で入力してください"); return; }
+  const dim = new Date(y, m, 0).getDate();
+  if (!(d >= 1 && d <= dim)) { showErr(`「日」は1〜${dim}で入力してください`); return; }
+  const hStr = $("bh").value.trim(), minStr = $("bmin").value.trim();
   let hh = 12, hasTime = false;
-  if (timeStr) { const [H,Mi] = timeStr.split(":").map(Number); hh = H + Mi/60; hasTime = true; }
+  if (hStr !== "") {
+    const H = parseInt(hStr, 10), Mi = minStr === "" ? 0 : parseInt(minStr, 10);
+    if (!(H >= 0 && H <= 23) || !(Mi >= 0 && Mi <= 59)) { showErr("出生時間は「時：0〜23」「分：0〜59」で入力してください"); return; }
+    hh = H + Mi/60; hasTime = true;
+  }
+  const timeStr = hasTime ? ($("bh").value + "時" + (minStr || "0") + "分") : "";
+  const dateStr = y + "年" + m + "月" + d + "日";
   const JD = jdFromJST(y,m,d,hh);
   const name = ($("cname").value.trim() || "クライアント").replace(/[\s　]*(さま|様|さん|氏)$/, "");
 
@@ -448,7 +477,7 @@ $("run").addEventListener("click", () => {
   const prefText = $("bpref").value;
   if (prefText.trim()) {
     const pi = prefLookup(prefText);
-    if (pi < 0) { alert("出生地が見つかりませんでした。「東京都」「大阪府」のように都道府県名で入力してください。"); return; }
+    if (pi < 0) { showErr("出生地が見つかりませんでした。「東京都」「大阪府」のように都道府県名で入力してください。"); return; }
     if (hasTime) {
       const [,lat,lonE] = PREFS[pi];
       asc = ascendant(JD, lat, lonE);
